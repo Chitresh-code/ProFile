@@ -82,12 +82,9 @@ def register(request):
         # Save the user in the database
         user.save()
         
-        # Create a token for the user
-        token, created = Token.objects.get_or_create(user=user)
-        
         # Return the user details and token in the success response
         serializer = UserSerializer(user)
-        return Response({"success": "User registered successfully", "user": serializer.data, "token": token.key}, status=status.HTTP_201_CREATED)
+        return Response({"success": "User registered successfully"}, status=status.HTTP_201_CREATED)
     except Exception as e:
         # Return an error response if an exception occurs
         return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
@@ -122,14 +119,18 @@ def login_view(request):
             # Log in the user
             login(request, user)
             
-            # Return the user details and token in the success response
-            serializer = UserSerializer(user)
-            
             # Create or retrieve the token for the user
             token, created = Token.objects.get_or_create(user=user)
             
+            # Check if the token is created
+            # This is useful when the user logs in multiple times
+            if not created:
+                # Delete the old token if it already exists
+                token.delete()
+                token = Token.objects.create(user=user)
+            
             # Return the user details and token in the success response
-            return Response({'success': 'User logged in', 'user': serializer.data, 'token': token.key}, status=status.HTTP_200_OK)
+            return Response({'success': 'User logged in', 'token': token.key}, status=status.HTTP_200_OK)
         else:
             # Return an error if the user is not authenticated
             return Response({'error': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
