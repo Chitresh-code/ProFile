@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     "pipeline",
     "rest_framework",
     "rest_framework.authtoken",
+    "corsheaders",
 ]
 
 MIDDLEWARE = [
@@ -56,6 +57,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
 ]
 
 ROOT_URLCONF = "backend.urls"
@@ -149,3 +151,29 @@ AUTH_USER_MODEL = "pipeline.User"
 #         'rest_framework.authentication.TokenAuthentication',
 #     ],
 # }
+
+# CORS settings
+CORS_ALLOW_ALL_ORIGINS = True  # For development only, restrict this in production
+
+CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOW_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+]
+
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]

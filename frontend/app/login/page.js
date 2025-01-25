@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { LogIn } from "lucide-react"
+import { LogIn, Eye, EyeOff } from "lucide-react"
 import { Button } from "../../components/ui/button"
 import { Input } from "../../components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "../../components/ui/card"
@@ -12,6 +12,7 @@ import { ToastProvider, ToastViewport, Toast, ToastTitle, ToastDescription, Toas
 export default function LoginPage() {
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
+  const [showPassword, setShowPassword] = useState(false)
   const [showToast, setShowToast] = useState(false)
   const [toastMessage, setToastMessage] = useState("")
   const router = useRouter()
@@ -41,6 +42,10 @@ export default function LoginPage() {
     }
   }
 
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword)
+  }
+
   return (
     <ToastProvider>
       <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center p-4">
@@ -68,14 +73,27 @@ export default function LoginPage() {
                 <label htmlFor="password" className="text-sm font-medium text-gray-200">
                   Password
                 </label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="Enter your password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
-                />
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Enter your password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="bg-gray-700 border-gray-600 text-white placeholder-gray-400 pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={togglePasswordVisibility}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-200"
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-5 w-5" aria-hidden="true" />
+                    ) : (
+                      <Eye className="h-5 w-5" aria-hidden="true" />
+                    )}
+                  </button>
+                </div>
               </div>
             </CardContent>
             <CardFooter className="flex flex-col space-y-4">

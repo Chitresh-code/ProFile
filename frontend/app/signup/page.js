@@ -3,10 +3,10 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { UserPlus } from "lucide-react"
+import { UserPlus, Eye, EyeOff } from "lucide-react"
 import { Button } from "../../components/ui/button"
 import { Input } from "../../components/ui/input"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../../components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "../../components/ui/card"
 import { ToastProvider, ToastViewport, Toast, ToastTitle, ToastDescription } from "../../components/ui/toast"
 
 export default function SignUpPage() {
@@ -15,6 +15,8 @@ export default function SignUpPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [showToast, setShowToast] = useState(false)
   const [toastMessage, setToastMessage] = useState("")
   const router = useRouter()
@@ -31,13 +33,14 @@ export default function SignUpPage() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Accept: "application/json",
         },
         body: JSON.stringify({
-          first_name: firstName,
-          last_name: lastName,
+          username: email, // Assuming email is used as username
           email,
           password,
-          confirm_password: confirmPassword,
+          first_name: firstName,
+          last_name: lastName,
         }),
       })
       const data = await response.json()
@@ -48,9 +51,18 @@ export default function SignUpPage() {
         setShowToast(true)
       }
     } catch (error) {
+      console.error("Registration error:", error)
       setToastMessage("An error occurred. Please try again.")
       setShowToast(true)
     }
+  }
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword)
+  }
+
+  const toggleConfirmPasswordVisibility = () => {
+    setShowConfirmPassword(!showConfirmPassword)
   }
 
   return (
@@ -110,27 +122,53 @@ export default function SignUpPage() {
                 <label htmlFor="password" className="text-sm font-medium text-gray-200">
                   Password
                 </label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="Enter your password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
-                />
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Enter your password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="bg-gray-700 border-gray-600 text-white placeholder-gray-400 pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={togglePasswordVisibility}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-200"
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-5 w-5" aria-hidden="true" />
+                    ) : (
+                      <Eye className="h-5 w-5" aria-hidden="true" />
+                    )}
+                  </button>
+                </div>
               </div>
               <div className="space-y-2">
                 <label htmlFor="confirmPassword" className="text-sm font-medium text-gray-200">
                   Confirm Password
                 </label>
-                <Input
-                  id="confirmPassword"
-                  type="password"
-                  placeholder="Confirm your password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
-                />
+                <div className="relative">
+                  <Input
+                    id="confirmPassword"
+                    type={showConfirmPassword ? "text" : "password"}
+                    placeholder="Confirm your password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="bg-gray-700 border-gray-600 text-white placeholder-gray-400 pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={toggleConfirmPasswordVisibility}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-200"
+                  >
+                    {showConfirmPassword ? (
+                      <EyeOff className="h-5 w-5" aria-hidden="true" />
+                    ) : (
+                      <Eye className="h-5 w-5" aria-hidden="true" />
+                    )}
+                  </button>
+                </div>
               </div>
             </CardContent>
             <CardFooter className="flex flex-col space-y-4">
