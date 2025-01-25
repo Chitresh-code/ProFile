@@ -87,11 +87,16 @@ WSGI_APPLICATION = "backend.wsgi.application"
 # Import the DATABASE_URL of the Neon postgreSQL database from the environment variables
 tmpPostgres = urlparse(os.getenv("DATABASE_URL"))
 
+# Decode the path if it's in bytes
+db_name = tmpPostgres.path.replace('/', '')
+if isinstance(db_name, bytes):
+    db_name = db_name.decode('utf-8')
+
 # Set the database configuration
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': tmpPostgres.path.replace('/', ''),
+        'NAME': db_name,
         'USER': tmpPostgres.username,
         'PASSWORD': tmpPostgres.password,
         'HOST': tmpPostgres.hostname,
