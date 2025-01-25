@@ -88,9 +88,11 @@ WSGI_APPLICATION = "backend.wsgi.application"
 tmpPostgres = urlparse(os.getenv("DATABASE_URL"))
 
 # Decode the path if it's in bytes
-db_name = tmpPostgres.path.replace('/', '')
+db_name = tmpPostgres.path
+print(db_name)
 if isinstance(db_name, bytes):
     db_name = db_name.decode('utf-8')
+    db_name = db_name.replace("/", "")
 
 # Set the database configuration
 DATABASES = {
