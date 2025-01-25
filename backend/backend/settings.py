@@ -89,7 +89,6 @@ tmpPostgres = urlparse(os.getenv("DATABASE_URL"))
 
 # Decode the path if it's in bytes
 db_name = tmpPostgres.path
-print(db_name)
 if isinstance(db_name, bytes):
     db_name = db_name.decode('utf-8')
     db_name = db_name.replace("/", "")
@@ -98,7 +97,7 @@ if isinstance(db_name, bytes):
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': db_name,
+        'NAME': tmpPostgres.path[1:],  # Remove the leading slash
         'USER': tmpPostgres.username,
         'PASSWORD': tmpPostgres.password,
         'HOST': tmpPostgres.hostname,
