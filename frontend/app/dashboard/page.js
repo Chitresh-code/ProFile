@@ -16,25 +16,30 @@ export default function DashboardPage() {
   const [toastMessage, setToastMessage] = useState("")
 
   // Static user data - will be replaced with API call later
-  const user = {
-    first_name: "John",
-    last_name: "Doe",
-    resume_created: 2,
-    profile_completion: 75,
-  }
+  const [user, setUser] = useState(null)
 
   useEffect(() => {
     const token = localStorage.getItem("token")
     if (!token) {
       router.push("/login")
     } else {
-      setIsLoading(false)
+      // Simulating API call
+      setTimeout(() => {
+        setUser({
+          first_name: "John",
+          last_name: "Doe",
+          resume_created: 2,
+          profile_completion: 75,
+        })
+        setIsLoading(false)
+      }, 1500) // Simulate a 1.5 second load time
     }
   }, [router])
 
   const handleLogout = async () => {
+    setIsLoading(true)
     try {
-      const response = await fetch("http://localhost:8000/api/logout/", {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_DJANGO_BACKEND_URL}/api/logout/`, {
         method: "POST",
         headers: {
           Authorization: `Token ${localStorage.getItem("token")}`,
@@ -52,6 +57,7 @@ export default function DashboardPage() {
       setToastMessage("An error occurred. Please try again.")
       setShowToast(true)
     }
+    setIsLoading(false)
   }
 
   if (isLoading) {

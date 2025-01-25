@@ -1,3 +1,6 @@
+// This component uses the NEXT_PUBLIC_DJANGO_BACKEND_URL environment variable
+// Make sure to set this in your .env.local file
+
 "use client"
 
 import { useState } from "react"
@@ -29,7 +32,7 @@ export default function SignUpPage() {
       return
     }
     try {
-      const response = await fetch("http://localhost:8000/api/register/", {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_DJANGO_BACKEND_URL}/api/register/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

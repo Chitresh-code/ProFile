@@ -1,3 +1,5 @@
+// This component uses the NEXT_PUBLIC_DJANGO_BACKEND_URL environment variable
+// Make sure to set this in your .env.local file
 "use client"
 
 import { useState } from "react"
@@ -6,7 +8,7 @@ import Link from "next/link"
 import { LogIn, Eye, EyeOff } from "lucide-react"
 import { Button } from "../../components/ui/button"
 import { Input } from "../../components/ui/input"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "../../components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "../../components/ui/card"
 import { ToastProvider, ToastViewport, Toast, ToastTitle, ToastDescription, ToastClose } from "../../components/ui/toast"
 
 export default function LoginPage() {
@@ -20,7 +22,7 @@ export default function LoginPage() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     try {
-      const response = await fetch("http://localhost:8000/api/login/", {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_DJANGO_BACKEND_URL}/api/login/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
