@@ -15,6 +15,7 @@ import os
 from dotenv import load_dotenv
 from urllib.parse import urlparse
 
+# Load the environment variables from the .env file to access the DATABASE_URL
 load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -43,6 +44,8 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "pipeline",
+    "rest_framework",
+    "rest_framework.authtoken",
 ]
 
 MIDDLEWARE = [
@@ -79,8 +82,10 @@ WSGI_APPLICATION = "backend.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+# Import the DATABASE_URL of the Neon postgreSQL database from the environment variables
 tmpPostgres = urlparse(os.getenv("DATABASE_URL"))
 
+# Set the database configuration
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -133,3 +138,14 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# Auth User Model
+# Needed for defining the custom user model instead of the default User model
+AUTH_USER_MODEL = "pipeline.User"
+
+# # Django REST framework settings
+# REST_FRAMEWORK = {
+#     'DEFAULT_AUTHENTICATION_CLASSES': [
+#         'rest_framework.authentication.TokenAuthentication',
+#     ],
+# }
