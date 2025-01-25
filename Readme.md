@@ -15,7 +15,7 @@ The goal of **ProFile** is to streamline the resume-building process by leveragi
 
 ## **Technologies Used**
 - **Backend**: Django
-- **Frontend**: Currently HTML (to be switched to React in the future)
+- **Frontend**: Currently focus on creating the backend (needed a dev to create frontend in React)
 - **Database**: PostgreSQL
 - **AI**: Custom AI algorithms for resume analysis and scoring.
 - **Authentication**: OAuth2 / JWT (for secure login)
@@ -61,7 +61,7 @@ The goal of **ProFile** is to streamline the resume-building process by leveragi
 This project is **currently under development**. New features and improvements will be added in upcoming releases. Stay tuned for updates!
 
 ## **Future Enhancements**
-- Integration with LinkedIn for automatic profile import.
+- Integration with LinkedIn and GitHub for automatic profile and projects import.
 - Real-time resume suggestions as users build their resumes.
 - Enhanced AI scoring system based on different job roles.
 - Multi-language support for a wider audience.
