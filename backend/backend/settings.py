@@ -161,7 +161,10 @@ AUTH_USER_MODEL = "pipeline.User"
 # }
 
 # CORS settings
-CORS_ALLOW_ALL_ORIGINS = True  # For development only, restrict this in production
+CORS_ALLOWED_ORIGINS = [
+    'https://profile-three-delta.vercel.app',
+    'http://localhost:3000',
+]
 
 CORS_ALLOW_CREDENTIALS = True
 
