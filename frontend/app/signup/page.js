@@ -11,6 +11,7 @@ import { Button } from "../../components/ui/button"
 import { Input } from "../../components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "../../components/ui/card"
 import { ToastProvider, ToastViewport, Toast, ToastTitle, ToastDescription } from "../../components/ui/toast"
+import { Spinner } from "../../components/ui/spinner"
 
 export default function SignUpPage() {
   const [firstName, setFirstName] = useState("")
@@ -22,13 +23,16 @@ export default function SignUpPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [showToast, setShowToast] = useState(false)
   const [toastMessage, setToastMessage] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    setIsLoading(true)
     if (password !== confirmPassword) {
       setToastMessage("Passwords don't match")
       setShowToast(true)
+      setIsLoading(false)
       return
     }
     try {
@@ -58,6 +62,15 @@ export default function SignUpPage() {
       setToastMessage("An error occurred. Please try again.")
       setShowToast(true)
     }
+    setIsLoading(false)
+  }
+
+  if (isLoading) {
+    return <Spinner 
+    size="large" 
+    overlay={true}
+    className="text-white"
+    />;
   }
 
   const togglePasswordVisibility = () => {

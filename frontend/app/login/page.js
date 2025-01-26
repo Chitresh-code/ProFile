@@ -10,6 +10,7 @@ import { Button } from "../../components/ui/button"
 import { Input } from "../../components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "../../components/ui/card"
 import { ToastProvider, ToastViewport, Toast, ToastTitle, ToastDescription, ToastClose } from "../../components/ui/toast"
+import { Spinner } from "../../components/ui/spinner"
 
 export default function LoginPage() {
   const [username, setUsername] = useState("")
@@ -17,10 +18,12 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [showToast, setShowToast] = useState(false)
   const [toastMessage, setToastMessage] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    setIsLoading(true)
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_DJANGO_BACKEND_URL}/api/login/`, {
         method: "POST",
@@ -42,6 +45,15 @@ export default function LoginPage() {
       setToastMessage("An error occurred. Please try again.")
       setShowToast(true)
     }
+    setIsLoading(false)
+  }
+
+  if (isLoading) {
+    return <Spinner 
+    size="large" 
+    overlay={true}
+    className="text-white"
+    />;
   }
 
   const togglePasswordVisibility = () => {

@@ -8,6 +8,7 @@ import { Button } from "../../components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card"
 import { ToastProvider, ToastViewport, Toast, ToastTitle, ToastDescription } from "../../components/ui/toast"
 import { UserProfileDropdown } from "../../components/user-profile-dropdown"
+import { Spinner } from '../../components/ui/spinner';
 
 export default function DashboardPage() {
   const router = useRouter()
@@ -61,7 +62,11 @@ export default function DashboardPage() {
   }
 
   if (isLoading) {
-    return <div>Loading...</div>
+    return <Spinner 
+    size="large" 
+    overlay={true}
+    className="text-white"
+    />;
   }
 
   return (

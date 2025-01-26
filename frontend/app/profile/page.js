@@ -18,6 +18,7 @@ import { Badge } from "../../components/ui/badge"
 import { Separator } from "../../components/ui/separator"
 import { ScrollArea } from "../../components/ui/scroll-area"
 import { ToastProvider, ToastViewport, Toast, ToastTitle, ToastDescription } from "../../components/ui/toast"
+import { Spinner } from "../../components/ui/spinner"
 
 export default function ProfilePage() {
   const router = useRouter()
@@ -107,11 +108,11 @@ export default function ProfilePage() {
   }
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center">
-        <div className="animate-pulse text-gray-400">Loading...</div>
-      </div>
-    )
+    return <Spinner 
+    size="large" 
+    overlay={true}
+    className="text-white"
+    />;
   }
 
   return (
