@@ -1,15 +1,22 @@
 "use client"
 
+import { Github } from 'lucide-react'
+import { Twitter } from 'lucide-react'
+import { Linkedin } from 'lucide-react'
+import { Globe } from 'lucide-react'
+import { ExternalLink } from 'lucide-react'
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { ArrowLeft, Save } from "lucide-react"
+import { ArrowLeft, Save, Edit, FileText } from "lucide-react"
 import { Button } from "../../components/ui/button"
 import { Input } from "../../components/ui/input"
-import { Textarea } from "../../components/ui/textarea"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card"
 import { Label } from "../../components/ui/label"
 import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/tabs"
+import { Badge } from "../../components/ui/badge"
+import { Separator } from "../../components/ui/separator"
+import { ScrollArea } from "../../components/ui/scroll-area"
 import { ToastProvider, ToastViewport, Toast, ToastTitle, ToastDescription } from "../../components/ui/toast"
 
 export default function ProfilePage() {
@@ -17,215 +24,230 @@ export default function ProfilePage() {
   const [isLoading, setIsLoading] = useState(true)
   const [showToast, setShowToast] = useState(false)
   const [toastMessage, setToastMessage] = useState("")
+  const [isEditing, setIsEditing] = useState(false)
   const [profileData, setProfileData] = useState({
-    user: {
-      username: "",
-      email: "",
-      first_name: "",
-      last_name: "",
-    },
-    user_detail: {
-      profile_picture: "",
-      address: "",
-      phone_number: "",
-      date_of_birth: "",
-      description: "",
-      profile_urls: {
-        linkedin: "",
-        github: "",
-        portfolio: "",
-      },
-      work_experience: [
-        {
-          company: "",
-          position: "",
-          start_date: "",
-          end_date: "",
-          description: "",
-        },
-      ],
-      education: [
-        {
-          institution: "",
-          degree: "",
-          field: "",
-          graduation_year: "",
-        },
-      ],
-      skills: [],
-      certifications: [],
-      projects: [
-        {
-          name: "",
-          description: "",
-          technologies: "",
-        },
-      ],
-    },
+    user_id: null,
+    email: "",
+    username: "",
+    first_name: "",
+    last_name: "",
+    resume_created: 0,
+    profile_picture: "",
+    address: "",
+    phone_number: "",
+    date_of_birth: "",
+    user_details: []
   })
 
   useEffect(() => {
-    const token = localStorage.getItem("token")
-    if (!token) {
-      router.push("/login")
-    } else {
-      // Simulating API call to fetch user data
-      // This will be replaced with an actual API call in the future
-      setTimeout(() => {
-        setProfileData({
-          user: {
-            username: "johndoe",
-            email: "john@example.com",
-            first_name: "John",
-            last_name: "Doe",
-          },
-          user_detail: {
-            profile_picture: "/placeholder.svg",
-            address: "123 Main St, Anytown, USA",
-            phone_number: "+1 (555) 123-4567",
-            date_of_birth: "1990-01-01",
-            description: "Passionate software developer with 5+ years of experience.",
-            profile_urls: {
-              linkedin: "https://linkedin.com/in/johndoe",
-              github: "https://github.com/johndoe",
-              portfolio: "https://johndoe.com",
-            },
-            work_experience: [
-              {
-                company: "Tech Corp",
-                position: "Senior Developer",
-                start_date: "2020-01-01",
-                end_date: "Present",
-                description: "Leading a team of developers on various projects.",
-              },
-            ],
-            education: [
-              {
-                institution: "University of Technology",
-                degree: "Bachelor of Science",
-                field: "Computer Science",
-                graduation_year: "2015",
-              },
-            ],
-            skills: ["JavaScript", "React", "Node.js", "Python"],
-            certifications: ["AWS Certified Developer", "Scrum Master"],
-            projects: [
-              {
-                name: "E-commerce Platform",
-                description: "Developed a full-stack e-commerce solution.",
-                technologies: "React, Node.js, MongoDB",
-              },
-            ],
+    const fetchProfile = async () => {
+      try {
+        const token = localStorage.getItem("token")
+        if (!token) {
+          router.push("/login")
+          return
+        }
+
+        const response = await fetch(`${process.env.NEXT_PUBLIC_DJANGO_BACKEND_URL}/api/view-profile/`, {
+          headers: {
+            Authorization: `Token ${token}`,
           },
         })
+        const data = await response.json()
+        console.log("Fetched profile data:", data)
+        setProfileData(data)
         setIsLoading(false)
-      }, 1000)
+      } catch (error) {
+        console.error("Error fetching profile:", error)
+        setIsLoading(false)
+      }
     }
+
+    fetchProfile()
   }, [router])
 
-  const handleChange = (section, field, value, index = null) => {
-    setProfileData((prev) => {
-      if (index !== null) {
-        const newSection = [...prev.user_detail[section]]
-        newSection[index] = { ...newSection[index], [field]: value }
-        return {
-          ...prev,
-          user_detail: {
-            ...prev.user_detail,
-            [section]: newSection,
-          },
-        }
-      }
-      if (section === "user") {
-        return { ...prev, user: { ...prev.user, [field]: value } }
-      }
-      if (section === "user_detail") {
-        if (field.includes(".")) {
-          const [parentField, childField] = field.split(".")
-          return {
-            ...prev,
-            user_detail: {
-              ...prev.user_detail,
-              [parentField]: {
-                ...prev.user_detail[parentField],
-                [childField]: value,
-              },
-            },
-          }
-        }
-        return {
-          ...prev,
-          user_detail: { ...prev.user_detail, [field]: value },
-        }
-      }
-      return prev
-    })
+  const handlePersonalInfoChange = (field, value) => {
+    setProfileData((prev) => ({
+      ...prev,
+      [field]: value
+    }))
   }
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    // This will be implemented later with the backend
-    console.log(profileData)
-    setToastMessage("Profile updated successfully!")
-    setShowToast(true)
+  const handleSubmit = async () => {
+    try {
+      const token = localStorage.getItem("token")
+      const response = await fetch(`${process.env.NEXT_PUBLIC_DJANGO_BACKEND_URL}/api/edit-profile/`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Token ${token}`,
+        },
+        body: JSON.stringify({
+          email: profileData.email,
+          username: profileData.username,
+          first_name: profileData.first_name,
+          last_name: profileData.last_name,
+          address: profileData.address,
+          phone_number: profileData.phone_number,
+          date_of_birth: profileData.date_of_birth
+        }),
+      })
+
+      if (response.ok) {
+        setToastMessage("Profile updated successfully!")
+        setShowToast(true)
+        setIsEditing(false)
+      } else {
+        throw new Error("Failed to update profile")
+      }
+    } catch (error) {
+      setToastMessage("Failed to update profile")
+      setShowToast(true)
+    }
   }
 
   if (isLoading) {
-    return <div>Loading...</div>
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center">
+        <div className="animate-pulse text-gray-400">Loading...</div>
+      </div>
+    )
   }
 
   return (
     <ToastProvider>
       <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900">
         <div className="container mx-auto px-4 py-8">
-          <div className="flex items-center justify-between mb-8">
+          {/* Header Section */}
+          <header className="flex items-center justify-between mb-8">
             <Button variant="ghost" className="text-gray-300 hover:text-white" onClick={() => router.back()}>
               <ArrowLeft className="mr-2 h-5 w-5" />
               Back to Dashboard
             </Button>
-            <Button
-              className="bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600"
-              onClick={handleSubmit}
-            >
-              <Save className="mr-2 h-5 w-5" />
-              Save Changes
-            </Button>
-          </div>
+            {isEditing ? (
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={() => setIsEditing(false)}>
+                  Cancel
+                </Button>
+                <Button
+                  className="bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600"
+                  onClick={handleSubmit}
+                >
+                  <Save className="mr-2 h-5 w-5" />
+                  Save Changes
+                </Button>
+              </div>
+            ) : (
+              <Button
+                variant="outline"
+                onClick={() => setIsEditing(true)}
+                className="border-emerald-500 text-emerald-500 hover:bg-emerald-500/10"
+              >
+                <Edit className="mr-2 h-4 w-4" />
+                Edit Profile
+              </Button>
+            )}
+          </header>
 
-          <Card className="bg-gray-800/50 border-gray-700 mb-8">
-            <CardHeader>
-              <div className="flex items-center space-x-4">
-                <Avatar className="h-20 w-20">
-                  <AvatarImage src={profileData.user_detail.profile_picture} alt={profileData.user.first_name} />
-                  <AvatarFallback>
-                    {profileData.user.first_name[0]}
-                    {profileData.user.last_name[0]}
+          {/* Profile Header Card */}
+          <Card className="bg-gray-800/50 border-gray-700 mb-8 overflow-hidden">
+            <div className="h-32 bg-gradient-to-r from-emerald-500/20 to-cyan-500/20" />
+            <CardHeader className="relative">
+              <div className="flex flex-col md:flex-row md:items-end gap-6">
+                <Avatar className="h-24 w-24 border-4 border-gray-800 absolute -top-12">
+                  <AvatarImage
+                    src={profileData.profile_picture || "/placeholder.svg"}
+                    alt={profileData.first_name || "User"}
+                  />
+                  <AvatarFallback className="bg-gradient-to-br from-emerald-500 to-cyan-500 text-white text-xl">
+                    {profileData.first_name?.[0] || "U"}
+                    {profileData.last_name?.[0] || "N"}
                   </AvatarFallback>
                 </Avatar>
-                <div>
-                  <CardTitle className="text-2xl font-bold text-white">
-                    {profileData.user.first_name} {profileData.user.last_name}
+                <div className="mt-12 md:mt-0 md:ml-32">
+                  <CardTitle className="text-3xl font-bold text-white">
+                    {profileData.first_name} {profileData.last_name}
                   </CardTitle>
-                  <CardDescription className="text-gray-400">@{profileData.user.username}</CardDescription>
+                  <CardDescription className="text-gray-400 flex items-center gap-2">
+                    @{profileData.username}
+                    <span className="text-gray-600">•</span>
+                    {profileData.resume_created} Resumes Created
+                  </CardDescription>
                 </div>
               </div>
             </CardHeader>
+            <CardContent>
+              <div className="flex flex-wrap gap-4 mt-4">
+                {profileData.user_details[0]?.profile_urls && (
+                  <>
+                    {profileData.user_details[0].profile_urls.github && (
+                      <a
+                        href={profileData.user_details[0].profile_urls.github}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 text-gray-400 hover:text-emerald-500 transition-colors"
+                      >
+                        <Github className="h-4 w-4" />
+                        GitHub
+                      </a>
+                    )}
+                    {profileData.user_details[0].profile_urls.twitter && (
+                      <a
+                        href={profileData.user_details[0].profile_urls.twitter}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 text-gray-400 hover:text-emerald-500 transition-colors"
+                      >
+                        <Twitter className="h-4 w-4" />
+                        Twitter
+                      </a>
+                    )}
+                    {profileData.user_details[0].profile_urls.linkedin && (
+                      <a
+                        href={profileData.user_details[0].profile_urls.linkedin}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 text-gray-400 hover:text-emerald-500 transition-colors"
+                      >
+                        <Linkedin className="h-4 w-4" />
+                        LinkedIn
+                      </a>
+                    )}
+                    {profileData.user_details[0].profile_urls.portfolio && (
+                      <a
+                        href={profileData.user_details[0].profile_urls.portfolio}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 text-gray-400 hover:text-emerald-500 transition-colors"
+                      >
+                        <Globe className="h-4 w-4" />
+                        Portfolio
+                      </a>
+                    )}
+                  </>
+                )}
+              </div>
+            </CardContent>
           </Card>
 
+          {/* Main Content */}
           <Tabs defaultValue="personal" className="space-y-4">
-            <TabsList className="bg-gray-800/50 border-gray-700">
+            <TabsList className="bg-gray-800/50 border-gray-700 p-1">
               <TabsTrigger
                 value="personal"
                 className="text-gray-300 data-[state=active]:text-white data-[state=active]:bg-gray-700/50"
               >
                 Personal Info
               </TabsTrigger>
-              <TabsTrigger
-                value="professional"
-                className="text-gray-300 data-[state=active]:text-white data-[state=active]:bg-gray-700/50"
-              >
-                Professional Info
-              </TabsTrigger>
+              {profileData.user_details.map((detail) => (
+                <TabsTrigger
+                  key={detail.user_details_id}
+                  value={`profile-${detail.user_details_id}`}
+                  className="text-gray-300 data-[state=active]:text-white data-[state=active]:bg-gray-700/50"
+                >
+                  {detail.name} Profile
+                </TabsTrigger>
+              ))}
             </TabsList>
 
             <TabsContent value="personal">
@@ -234,341 +256,321 @@ export default function ProfilePage() {
                   <CardTitle className="text-xl font-semibold text-white">Personal Information</CardTitle>
                   <CardDescription className="text-gray-400">Update your personal details</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
+                <CardContent>
+                  <div className="grid gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="firstName" className="text-gray-200">
+                          First Name
+                        </Label>
+                        <Input
+                          id="firstName"
+                          value={profileData.first_name}
+                          onChange={(e) => handlePersonalInfoChange("first_name", e.target.value)}
+                          disabled={!isEditing}
+                          className="bg-gray-700/50 border-gray-600 text-white placeholder-gray-400"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="lastName" className="text-gray-200">
+                          Last Name
+                        </Label>
+                        <Input
+                          id="lastName"
+                          value={profileData.last_name}
+                          onChange={(e) => handlePersonalInfoChange("last_name", e.target.value)}
+                          disabled={!isEditing}
+                          className="bg-gray-700/50 border-gray-600 text-white placeholder-gray-400"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="email" className="text-gray-200">
+                          Email
+                        </Label>
+                        <Input
+                          id="email"
+                          type="email"
+                          value={profileData.email}
+                          onChange={(e) => handlePersonalInfoChange("email", e.target.value)}
+                          disabled={!isEditing}
+                          className="bg-gray-700/50 border-gray-600 text-white placeholder-gray-400"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="phone" className="text-gray-200">
+                          Phone
+                        </Label>
+                        <Input
+                          id="phone"
+                          value={profileData.phone_number}
+                          onChange={(e) => handlePersonalInfoChange("phone_number", e.target.value)}
+                          disabled={!isEditing}
+                          className="bg-gray-700/50 border-gray-600 text-white placeholder-gray-400"
+                        />
+                      </div>
+                    </div>
+
                     <div className="space-y-2">
-                      <Label htmlFor="firstName" className="text-gray-200">
-                        First Name
+                      <Label htmlFor="address" className="text-gray-200">
+                        Address
                       </Label>
                       <Input
-                        id="firstName"
-                        value={profileData.user.first_name}
-                        onChange={(e) => handleChange("user", "first_name", e.target.value)}
-                        className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
+                        id="address"
+                        value={profileData.address}
+                        onChange={(e) => handlePersonalInfoChange("address", e.target.value)}
+                        disabled={!isEditing}
+                        className="bg-gray-700/50 border-gray-600 text-white placeholder-gray-400"
                       />
                     </div>
+
                     <div className="space-y-2">
-                      <Label htmlFor="lastName" className="text-gray-200">
-                        Last Name
+                      <Label htmlFor="dateOfBirth" className="text-gray-200">
+                        Date of Birth
                       </Label>
                       <Input
-                        id="lastName"
-                        value={profileData.user.last_name}
-                        onChange={(e) => handleChange("user", "last_name", e.target.value)}
-                        className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
+                        id="dateOfBirth"
+                        type="date"
+                        value={profileData.date_of_birth}
+                        onChange={(e) => handlePersonalInfoChange("date_of_birth", e.target.value)}
+                        disabled={!isEditing}
+                        className="bg-gray-700/50 border-gray-600 text-white placeholder-gray-400"
                       />
                     </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="email" className="text-gray-200">
-                      Email
-                    </Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={profileData.user.email}
-                      onChange={(e) => handleChange("user", "email", e.target.value)}
-                      className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="phone" className="text-gray-200">
-                      Phone
-                    </Label>
-                    <Input
-                      id="phone"
-                      value={profileData.user_detail.phone_number}
-                      onChange={(e) => handleChange("user_detail", "phone_number", e.target.value)}
-                      className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="address" className="text-gray-200">
-                      Address
-                    </Label>
-                    <Input
-                      id="address"
-                      value={profileData.user_detail.address}
-                      onChange={(e) => handleChange("user_detail", "address", e.target.value)}
-                      className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="dateOfBirth" className="text-gray-200">
-                      Date of Birth
-                    </Label>
-                    <Input
-                      id="dateOfBirth"
-                      type="date"
-                      value={profileData.user_detail.date_of_birth}
-                      onChange={(e) => handleChange("user_detail", "date_of_birth", e.target.value)}
-                      className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
-                    />
                   </div>
                 </CardContent>
               </Card>
             </TabsContent>
 
-            <TabsContent value="professional">
-              <Card className="bg-gray-800/50 border-gray-700">
-                <CardHeader>
-                  <CardTitle className="text-xl font-semibold text-white">Professional Information</CardTitle>
-                  <CardDescription className="text-gray-400">
-                    Update your professional details and experience
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="space-y-2">
-                    <Label htmlFor="description" className="text-gray-200">
-                      Professional Summary
-                    </Label>
-                    <Textarea
-                      id="description"
-                      value={profileData.user_detail.description}
-                      onChange={(e) => handleChange("user_detail", "description", e.target.value)}
-                      className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
-                      rows={4}
-                    />
-                  </div>
-
-                  <div className="space-y-4">
-                    <Label className="text-gray-200">Profile URLs</Label>
-                    <div className="space-y-2">
-                      <Label htmlFor="linkedin" className="text-gray-300">
-                        LinkedIn
-                      </Label>
-                      <Input
-                        id="linkedin"
-                        value={profileData.user_detail.profile_urls.linkedin}
-                        onChange={(e) => handleChange("user_detail", "profile_urls.linkedin", e.target.value)}
-                        className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="github" className="text-gray-300">
-                        GitHub
-                      </Label>
-                      <Input
-                        id="github"
-                        value={profileData.user_detail.profile_urls.github}
-                        onChange={(e) => handleChange("user_detail", "profile_urls.github", e.target.value)}
-                        className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="portfolio" className="text-gray-300">
-                        Portfolio
-                      </Label>
-                      <Input
-                        id="portfolio"
-                        value={profileData.user_detail.profile_urls.portfolio}
-                        onChange={(e) => handleChange("user_detail", "profile_urls.portfolio", e.target.value)}
-                        className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-4">
-                    <Label className="text-gray-200">Work Experience</Label>
-                    {profileData.user_detail.work_experience.map((exp, index) => (
-                      <Card key={index} className="bg-gray-700/50 border-gray-600">
-                        <CardContent className="pt-6 space-y-4">
-                          <div className="space-y-2">
-                            <Label htmlFor={`company-${index}`} className="text-gray-300">
-                              Company
-                            </Label>
-                            <Input
-                              id={`company-${index}`}
-                              value={exp.company}
-                              onChange={(e) => handleChange("work_experience", "company", e.target.value, index)}
-                              className="bg-gray-600 border-gray-500 text-white placeholder-gray-400"
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor={`position-${index}`} className="text-gray-300">
-                              Position
-                            </Label>
-                            <Input
-                              id={`position-${index}`}
-                              value={exp.position}
-                              onChange={(e) => handleChange("work_experience", "position", e.target.value, index)}
-                              className="bg-gray-600 border-gray-500 text-white placeholder-gray-400"
-                            />
-                          </div>
-                          <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                              <Label htmlFor={`startDate-${index}`} className="text-gray-300">
-                                Start Date
-                              </Label>
-                              <Input
-                                id={`startDate-${index}`}
-                                type="date"
-                                value={exp.start_date}
-                                onChange={(e) => handleChange("work_experience", "start_date", e.target.value, index)}
-                                className="bg-gray-600 border-gray-500 text-white placeholder-gray-400"
-                              />
-                            </div>
-                            <div className="space-y-2">
-                              <Label htmlFor={`endDate-${index}`} className="text-gray-300">
-                                End Date
-                              </Label>
-                              <Input
-                                id={`endDate-${index}`}
-                                type="date"
-                                value={exp.end_date}
-                                onChange={(e) => handleChange("work_experience", "end_date", e.target.value, index)}
-                                className="bg-gray-600 border-gray-500 text-white placeholder-gray-400"
-                              />
+            {profileData.user_details.map((detail) => (
+              <TabsContent key={detail.user_details_id} value={`profile-${detail.user_details_id}`}>
+                <div className="grid gap-6">
+                  {/* Skills Section */}
+                  <Card className="bg-gray-800/50 border-gray-700">
+                    <CardHeader>
+                      <CardTitle className="text-xl font-semibold text-white">Skills</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid gap-6">
+                        {Object.entries(detail.skills).map(([category, skills]) => (
+                          <div key={category}>
+                            <h4 className="text-gray-300 capitalize mb-3">{category.replace("_", " ")}</h4>
+                            <div className="flex flex-wrap gap-2">
+                              {skills.map((skill) => (
+                                <Badge
+                                  key={skill}
+                                  variant="secondary"
+                                  className="bg-gray-700/50 text-gray-200 hover:bg-gray-600/50"
+                                >
+                                  {skill}
+                                </Badge>
+                              ))}
                             </div>
                           </div>
-                          <div className="space-y-2">
-                            <Label htmlFor={`description-${index}`} className="text-gray-300">
-                              Description
-                            </Label>
-                            <Textarea
-                              id={`description-${index}`}
-                              value={exp.description}
-                              onChange={(e) => handleChange("work_experience", "description", e.target.value, index)}
-                              className="bg-gray-600 border-gray-500 text-white placeholder-gray-400"
-                              rows={3}
-                            />
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
 
-                  <div className="space-y-4">
-                    <Label className="text-gray-200">Education</Label>
-                    {profileData.user_detail.education.map((edu, index) => (
-                      <Card key={index} className="bg-gray-700/50 border-gray-600">
-                        <CardContent className="pt-6 space-y-4">
-                          <div className="space-y-2">
-                            <Label htmlFor={`institution-${index}`} className="text-gray-300">
-                              Institution
-                            </Label>
-                            <Input
-                              id={`institution-${index}`}
-                              value={edu.institution}
-                              onChange={(e) => handleChange("education", "institution", e.target.value, index)}
-                              className="bg-gray-600 border-gray-500 text-white placeholder-gray-400"
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor={`degree-${index}`} className="text-gray-300">
-                              Degree
-                            </Label>
-                            <Input
-                              id={`degree-${index}`}
-                              value={edu.degree}
-                              onChange={(e) => handleChange("education", "degree", e.target.value, index)}
-                              className="bg-gray-600 border-gray-500 text-white placeholder-gray-400"
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor={`field-${index}`} className="text-gray-300">
-                              Field of Study
-                            </Label>
-                            <Input
-                              id={`field-${index}`}
-                              value={edu.field}
-                              onChange={(e) => handleChange("education", "field", e.target.value, index)}
-                              className="bg-gray-600 border-gray-500 text-white placeholder-gray-400"
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor={`graduationYear-${index}`} className="text-gray-300">
-                              Graduation Year
-                            </Label>
-                            <Input
-                              id={`graduationYear-${index}`}
-                              value={edu.graduation_year}
-                              onChange={(e) => handleChange("education", "graduation_year", e.target.value, index)}
-                              className="bg-gray-600 border-gray-500 text-white placeholder-gray-400"
-                            />
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
+                  {/* Work Experience Section */}
+                  <Card className="bg-gray-800/50 border-gray-700">
+                    <CardHeader className="flex flex-row items-center justify-between">
+                      <CardTitle className="text-xl font-semibold text-white">Work Experience</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <ScrollArea className="h-[400px] pr-4">
+                        <div className="grid gap-4">
+                          {detail.work_experience.map((exp, index) => (
+                            <Card key={index} className="bg-gray-700/30 border-gray-600">
+                              <CardHeader>
+                                <div className="flex justify-between items-start">
+                                  <div>
+                                    <CardTitle className="text-lg font-semibold text-white">{exp.position}</CardTitle>
+                                    <CardDescription className="text-gray-300">{exp.company}</CardDescription>
+                                  </div>
+                                  <Badge variant="outline" className="text-gray-400 border-gray-600">
+                                    {exp.start_date} - {exp.end_date}
+                                  </Badge>
+                                </div>
+                              </CardHeader>
+                              <CardContent>
+                                <p className="text-gray-300 text-sm leading-relaxed">{exp.description}</p>
+                              </CardContent>
+                            </Card>
+                          ))}
+                        </div>
+                      </ScrollArea>
+                    </CardContent>
+                  </Card>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="skills" className="text-gray-200">
-                      Skills
-                    </Label>
-                    <Textarea
-                      id="skills"
-                      value={profileData.user_detail.skills.join(", ")}
-                      onChange={(e) => handleChange("user_detail", "skills", e.target.value.split(", "))}
-                      className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
-                      placeholder="Enter skills separated by commas"
-                      rows={3}
-                    />
-                  </div>
+                  {/* Education Section */}
+                  <Card className="bg-gray-800/50 border-gray-700">
+                    <CardHeader>
+                      <CardTitle className="text-xl font-semibold text-white">Education</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid gap-4">
+                        {detail.education.map((edu, index) => (
+                          <Card key={index} className="bg-gray-700/30 border-gray-600">
+                            <CardHeader>
+                              <div className="flex justify-between items-start">
+                                <div>
+                                  <CardTitle className="text-lg font-semibold text-white">{edu.degree}</CardTitle>
+                                  <CardDescription className="text-gray-300">
+                                    {edu.institution} • {edu.field_of_study}
+                                  </CardDescription>
+                                </div>
+                                <Badge variant="outline" className="text-gray-400 border-gray-600">
+                                  {edu.start_date} - {edu.end_date}
+                                </Badge>
+                              </div>
+                            </CardHeader>
+                            <CardContent>
+                              <p className="text-gray-300 text-sm">{edu.description}</p>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="certifications" className="text-gray-200">
-                      Certifications
-                    </Label>
-                    <Textarea
-                      id="certifications"
-                      value={profileData.user_detail.certifications.join(", ")}
-                      onChange={(e) => handleChange("user_detail", "certifications", e.target.value.split(", "))}
-                      className="bg-gray-700 border-gray-600 text-white placeholder-gray-400"
-                      placeholder="Enter certifications separated by commas"
-                      rows={3}
-                    />
-                  </div>
+                  {/* Projects Section */}
+                  <Card className="bg-gray-800/50 border-gray-700">
+                    <CardHeader>
+                      <CardTitle className="text-xl font-semibold text-white">Projects</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid gap-4">
+                        {detail.projects.map((project, index) => (
+                          <Card key={index} className="bg-gray-700/30 border-gray-600">
+                            <CardHeader>
+                              <div className="flex justify-between items-start">
+                                <CardTitle className="text-lg font-semibold text-white">{project.name}</CardTitle>
+                                {project.live_url && (
+                                  <a
+                                    href={project.live_url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-emerald-500 hover:text-emerald-400 flex items-center gap-1"
+                                  >
+                                    <ExternalLink className="h-4 w-4" />
+                                    Live Demo
+                                  </a>
+                                )}
+                              </div>
+                            </CardHeader>
+                            <CardContent>
+                              <p className="text-gray-300 text-sm mb-4">{project.description}</p>
+                              <div className="flex flex-wrap gap-2">
+                                {project.technologies.map((tech) => (
+                                  <Badge key={tech} variant="secondary" className="bg-gray-600/50 text-gray-200">
+                                    {tech}
+                                  </Badge>
+                                ))}
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
 
-                  <div className="space-y-4">
-                    <Label className="text-gray-200">Projects</Label>
-                    {profileData.user_detail.projects.map((project, index) => (
-                      <Card key={index} className="bg-gray-700/50 border-gray-600">
-                        <CardContent className="pt-6 space-y-4">
-                          <div className="space-y-2">
-                            <Label htmlFor={`projectName-${index}`} className="text-gray-300">
-                              Project Name
-                            </Label>
-                            <Input
-                              id={`projectName-${index}`}
-                              value={project.name}
-                              onChange={(e) => handleChange("projects", "name", e.target.value, index)}
-                              className="bg-gray-600 border-gray-500 text-white placeholder-gray-400"
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor={`projectDescription-${index}`} className="text-gray-300">
-                              Description
-                            </Label>
-                            <Textarea
-                              id={`projectDescription-${index}`}
-                              value={project.description}
-                              onChange={(e) => handleChange("projects", "description", e.target.value, index)}
-                              className="bg-gray-600 border-gray-500 text-white placeholder-gray-400"
-                              rows={3}
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor={`projectTechnologies-${index}`} className="text-gray-300">
-                              Technologies
-                            </Label>
-                            <Input
-                              id={`projectTechnologies-${index}`}
-                              value={project.technologies}
-                              onChange={(e) => handleChange("projects", "technologies", e.target.value, index)}
-                              className="bg-gray-600 border-gray-500 text-white placeholder-gray-400"
-                            />
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
+                  {/* Awards and Honors Section */}
+                  <Card className="bg-gray-800/50 border-gray-700">
+                    <CardHeader>
+                      <CardTitle className="text-xl font-semibold text-white">Awards & Honors</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid gap-4">
+                        {detail.awards_and_honors.map((award, index) => (
+                          <Card key={index} className="bg-gray-700/30 border-gray-600">
+                            <CardHeader>
+                              <div className="flex justify-between items-start">
+                                <div>
+                                  <CardTitle className="text-lg font-semibold text-white">{award.name}</CardTitle>
+                                  <CardDescription className="text-gray-300">{award.organization}</CardDescription>
+                                </div>
+                                <Badge variant="outline" className="text-gray-400 border-gray-600">
+                                  {award.date}
+                                </Badge>
+                              </div>
+                            </CardHeader>
+                            <CardContent>
+                              <p className="text-gray-300 text-sm">{award.description}</p>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Volunteer Experience Section */}
+                  <Card className="bg-gray-800/50 border-gray-700">
+                    <CardHeader>
+                      <CardTitle className="text-xl font-semibold text-white">Volunteer Experience</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid gap-4">
+                        {detail.volunteer_experience.map((exp, index) => (
+                          <Card key={index} className="bg-gray-700/30 border-gray-600">
+                            <CardHeader>
+                              <div className="flex justify-between items-start">
+                                <div>
+                                  <CardTitle className="text-lg font-semibold text-white">{exp.role}</CardTitle>
+                                  <CardDescription className="text-gray-300">{exp.organization}</CardDescription>
+                                </div>
+                                <Badge variant="outline" className="text-gray-400 border-gray-600">
+                                  {exp.start_date} - {exp.end_date}
+                                </Badge>
+                              </div>
+                            </CardHeader>
+                            <CardContent>
+                              <p className="text-gray-300 text-sm">{exp.description}</p>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* References Section */}
+                  <Card className="bg-gray-800/50 border-gray-700">
+                    <CardHeader>
+                      <CardTitle className="text-xl font-semibold text-white">References</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid gap-4">
+                        {detail.references.map((reference, index) => (
+                          <Card key={index} className="bg-gray-700/30 border-gray-600">
+                            <CardHeader>
+                              <CardTitle className="text-lg font-semibold text-white">{reference.name}</CardTitle>
+                              <CardDescription className="text-gray-300">
+                                {reference.job_title} at {reference.company}
+                              </CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                              <div className="space-y-2">
+                                <p className="text-gray-300 text-sm">{reference.contacts.description}</p>
+                                <div className="flex flex-wrap gap-4 text-sm text-gray-400">
+                                  <span>Email: {reference.contacts.email}</span>
+                                  <span>Phone: {reference.contacts.phone_number}</span>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </TabsContent>
+            ))}
           </Tabs>
         </div>
       </div>
+
       <ToastViewport />
       {showToast && (
         <Toast>
@@ -579,4 +581,3 @@ export default function ProfilePage() {
     </ToastProvider>
   )
 }
-

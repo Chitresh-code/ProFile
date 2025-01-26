@@ -13,8 +13,14 @@ If we don't add a model to the admin panel, we won't be able to manage it using 
 # Registering the model Users
 admin.site.register(User)
 
+
+# In the admin the user details are displayed as a table with the following columns: id, user, name
+class UserDetailAdmin(admin.ModelAdmin):
+    list_display = ('user_details_id', 'user', 'name')
+
 # Registering the model User_Details
-admin.site.register(User_Detail)
+admin.site.register(User_Detail, UserDetailAdmin)
+
 
 # Registering the model Resumes
 admin.site.register(Resume)

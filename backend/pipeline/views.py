@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from .models import User
-from .serializers import UserSerializer
+from .serializers import UserSerializer, UserRegisterationSerializer
 from rest_framework.response import Response
 from rest_framework import status
 from .utils import create_username
@@ -53,7 +53,11 @@ def register(request):
         # Remove the confirm_password field from the input data
         data.pop('confirm_password')
         
-        serializer = UserSerializer(data=request.data)
+        # Create a unique username for the user
+        username = create_username(data['first_name'], data['last_name'])
+        data['username'] = username
+        
+        serializer = UserRegisterationSerializer(data=data)
         
         # Check if the input data is valid
         if serializer.is_valid():
@@ -61,9 +65,6 @@ def register(request):
         else:
             # Return an error response if the input data is invalid
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        
-        # Create a unique username for the user
-        username = create_username(data['first_name'], data['last_name'])
         
         # Check if the email already exists in the database
         if User.objects.filter(email=data['email']).exists():
@@ -163,6 +164,73 @@ def logout_view(request):
         
         # Return a success response
         return Response({'success': 'User logged out'}, status=status.HTTP_200_OK)
+    except Exception as e:
+        # Return an error response if an exception occurs
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+@authentication_classes([TokenAuthentication])
+def get_user_profile(request):
+    """
+    This view is used to get the user's profile.
+    It returns the user details in the response.
+    
+    Args:
+        request: The JSON request containing the user details.
+        Make sure in the request header, the 'Authorization' key is set to 'Token <token>'.
+        Where <token> is the token generated for the user.
+        
+    Returns:
+        A JSON response containing the user details.
+    """
+    try:
+        # Get the user details
+        user = request.user
+        
+        # Return the user details in the response
+        serializer = UserSerializer(user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    except Exception as e:
+        # Return an error response if an exception occurs
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['PATCH'])
+@permission_classes([IsAuthenticated])
+@authentication_classes([TokenAuthentication])   
+def edit_user_details(request):
+    """
+    This view is used to edit the user's details.
+    It takes the user's first name, last name, and email as input.
+    It updates the user details in the database and returns the updated user details in the response.
+    
+    Args:
+        request: The JSON request containing the user details.
+        The request should contain the fields that need to be updated.
+        For example, if the user wants to update the first name, the request should contain the 'first_name' field.
+        Make sure in the request header, the 'Authorization' key is set to 'Token <token>'.
+        Where <token> is the token generated for the user.  
+    
+    Returns:
+        A JSON response containing the updated user details.
+    """
+    try:
+        # Get the user details
+        user = request.user
+        
+        # Validate the input data
+        data = request.data
+        
+        # Update the user details
+        for key, value in data.items():
+            setattr(user, key, value)
+        
+        # Save the updated user details
+        user.save()
+        
+        # Return the updated user details in the response
+        serializer = UserSerializer(user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
     except Exception as e:
         # Return an error response if an exception occurs
         return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)

@@ -33,6 +33,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     'profile-production-5b9a.up.railway.app',
+    'localhost',
 ]
 
 

@@ -7,16 +7,22 @@ Serializers are used to convert complex data types like querysets and model inst
 We can also use serializers to convert complex data types back into querysets or model instances.
 Serializers are used in Django REST framework to serialize and deserialize data.
 """
-
-class UserSerializer(serializers.ModelSerializer):
+        
+class UserRegisterationSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['first_name', 'last_name', 'email', 'password'] # Remove 'password' field from the serializer
+        fields = ['email', 'username', 'password', 'first_name', 'last_name']
         
 class User_DetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = User_Detail
         fields = '__all__'
+        
+class UserSerializer(serializers.ModelSerializer):
+    user_details = User_DetailSerializer(source='user_detail_set', many=True, read_only=True)
+    class Meta:
+        model = User
+        fields = ['user_id', 'email', 'username', 'first_name', 'last_name', 'resume_created', 'profile_picture', 'address', 'phone_number', 'date_of_birth', 'user_details']
         
 class ResumeSerializer(serializers.ModelSerializer):
     class Meta:

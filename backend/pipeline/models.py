@@ -16,6 +16,10 @@ class User(AbstractUser):
     resume_created = models.IntegerField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    profile_picture = models.ImageField(upload_to='profile_pictures/', null=True)
+    address = models.CharField(max_length=100, null=True)
+    phone_number = models.CharField(max_length=100, null=True)
+    date_of_birth = models.DateField(null=True)
     
     def __str__(self):
         return self.username
@@ -74,11 +78,8 @@ class User_Detail(models.Model):
     TODO: In a pro feature, we can link the github and linkedin profiles to add projects, work experience, etc. automatically.
     """
     user_details_id = models.AutoField(primary_key=True, auto_created=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    profile_picture = models.ImageField(upload_to='profile_pictures/', null=True)
-    address = models.CharField(max_length=100, null=True)
-    phone_number = models.CharField(max_length=100, null=True)
-    date_of_birth = models.DateField(null=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_detail_set')
+    name = models.CharField(max_length=100, null=True)
     profile_urls = models.JSONField(null=True)
     description = models.TextField(null=True)
     work_experience = models.JSONField(null=True)
