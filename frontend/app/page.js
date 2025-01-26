@@ -43,7 +43,7 @@ export default function Home() {
               asChild
               size="lg"
               variant="outline"
-              className="border-gray-600 text-gray-300 hover:text-white hover:bg-gray-800 transform hover:scale-105 transition-transform duration-200"
+              className="border-gray-600 text-black hover:text-white hover:bg-gray-800 transform hover:scale-105 transition-transform duration-200"
             >
               <Link href="/login">Sign In</Link>
             </Button>
